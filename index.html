@@ -43,7 +43,71 @@
             opacity: 0;
             /* Gesamtdauer 20s: 10s fuer diesen Block, 10s Pause */
             animation: fadeLoop 20s infinite ease-in-out;
+            animation-play-state: paused;
             width: 100%;
+        }
+
+        /* Overlay and Button */
+        #startOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #F8F8F8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s ease;
+        }
+
+        #startButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            width: 250px;
+            height: 250px;
+            max-width: 80vw;
+            max-height: 80vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            outline: none;
+            transition: transform 0.3s;
+        }
+
+        #startButton:hover {
+            transform: scale(1.05);
+        }
+
+        #startButton svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            fill: #E31B23; /* Klassisches Rot */
+            filter: drop-shadow(0px 8px 25px rgba(255, 105, 180, 0.9)); /* Deutlicheres, kraeftigeres Pink */
+        }
+
+        #btnText {
+            transition: opacity 1s ease-in-out;
+        }
+
+        #startButton span {
+            position: relative;
+            z-index: 10;
+            color: #F8F8F8; /* Same as background */
+            font-family: 'Pinyon Script', cursive, sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+            pointer-events: none;
+            margin-bottom: 25px; /* Offset to center text in 'heart' visually */
+            text-align: center;
+            line-height: 1.1;
+            padding: 0 10px;
         }
 
         /* Verzoegerungen aufteilen */
@@ -126,10 +190,30 @@
             h3 {
                 font-size: 18px;
             }
+            #startButton {
+                width: 200px;
+                height: 200px;
+            }
+            #startButton span {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <div id="startOverlay">
+        <button id="startButton">
+            <svg viewBox="0 0 32 29.6" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+            </svg>
+            <span id="btnText">Hier klicken</span>
+        </button>
+    </div>
+
+    <audio id="bgMusic" src="Arrival-of-the-Queen-of-Sheba-Oboes-Strings-and-Harpsichord-2021.mp3" preload="auto" loop></audio>
+
     <div class="container">
         <!-- Deutscher Text -->
         <div class="text-block deutsch">
@@ -145,5 +229,45 @@
             <h3>Další informace budou následovat v pravý čas</h3>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnTextSpan = document.getElementById('btnText');
+            const overlay = document.getElementById('startOverlay');
+            const startButton = document.getElementById('startButton');
+            const bgMusic = document.getElementById('bgMusic');
+            const textBlocks = document.querySelectorAll('.text-block');
+
+            let isGerman = true;
+            const textInterval = setInterval(() => {
+                // Fade out
+                btnTextSpan.style.opacity = '0';
+                
+                // After fade out completes (1s), change text and fade back in
+                setTimeout(() => {
+                    isGerman = !isGerman;
+                    btnTextSpan.innerText = isGerman ? "Hier klicken" : "Klikněte zde";
+                    btnTextSpan.style.opacity = '1';
+                }, 1000);
+            }, 5000);
+
+            startButton.addEventListener('click', () => {
+                clearInterval(textInterval); // Stop text change
+                
+                bgMusic.play().catch(error => {
+                    console.log("Audio playback failed:", error);
+                });
+
+                overlay.style.opacity = '0';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    textBlocks.forEach(block => {
+                        block.style.animationPlayState = 'running';
+                    });
+                }, 1000);
+            });
+        });
+    </script>
 </body>
 </html>
